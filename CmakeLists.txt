@@ -1,0 +1,28 @@
+cmake_minimum_required(VERSION 3.20)
+
+set(ProjectName CADEX)
+project(${ProjectName} LANGUAGES CXX)
+
+set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+set(Target parser)
+
+file(GLOB_RECURSE SourceFiles "src/*.cpp")
+add_executable(${Target} ${SourceFiles})
+
+set_target_properties(${Target} PROPERTIES
+    UNITY_BUILD TRUE
+)
+
+# чтобы println работал под win32 и gcc
+if (WIN32 AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    target_link_libraries(${Target} PRIVATE stdc++exp)
+endif()
+
+# копируем тесты
+add_custom_command(TARGET ${Target} POST_BUILD
+  COMMAND ${CMAKE_COMMAND} -E copy_directory
+  "${CMAKE_CURRENT_SOURCE_DIR}/tests"
+  "$<TARGET_FILE_DIR:${Target}>/tests"
+  COMMENT "Copy tests")
