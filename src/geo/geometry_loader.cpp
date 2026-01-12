@@ -23,20 +23,21 @@ std::vector<std::shared_ptr<Geometry>> LoadFromFile(const std::filesystem::path&
 			for (i64 i = 0; i < shapesCount; i++) {
 				if (std::getline(file, line)) {
 					if (line.length() > 0) {
-						std::string name;
+						std::string shapeLabel;
 						u64 shapeID = 0;
 						char shapeType = 0;
+						f64 x, y, z;
 
 						std::istringstream stream(line);
 
-						if (stream >> shapeType >> shapeID >> std::quoted(name)) {
+						if (stream >> shapeType >> shapeID >> std::quoted(shapeLabel) >> x >> y >> z) {
 							switch (shapeType) {
 								// circle
 								case 'C': {
-									f64 x, y, z, radius;
+									f64 radius;
 
-									if (stream >> x >> y >> z >> radius) {
-										shapes.emplace_back(geoBuilder.CreateCircle(name, shapeID, vec3(x, y, z), radius));
+									if (stream >> radius) {
+										shapes.emplace_back(geoBuilder.CreateCircle(std::move(shapeLabel), shapeID, vec3(x, y, z), radius));
 									} else {
 										LogError("Unable to parse circle: %s", line.c_str());
 									}
@@ -44,10 +45,10 @@ std::vector<std::shared_ptr<Geometry>> LoadFromFile(const std::filesystem::path&
 
 								// ellipse
 								case 'E': {
-									f64 x, y, z, radiusX, radiusY;
+									f64 radiusX, radiusY;
 
-									if (stream >> x >> y >> z >> radiusX >> radiusY) {
-										shapes.emplace_back(geoBuilder.CreateEllipse(name, shapeID, vec3(x, y, z), radiusX, radiusY));
+									if (stream >> radiusX >> radiusY) {
+										shapes.emplace_back(geoBuilder.CreateEllipse(std::move(shapeLabel), shapeID, vec3(x, y, z), radiusX, radiusY));
 									} else {
 										LogError("Unable to parse ellipse: %s", line.c_str());
 									}
@@ -55,10 +56,10 @@ std::vector<std::shared_ptr<Geometry>> LoadFromFile(const std::filesystem::path&
 
 								// helix
 								case 'H': {
-									f64 x, y, z, radius, step;
+									f64 radius, step;
 
-									if (stream >> x >> y >> z >> radius >> step) {
-										shapes.emplace_back(geoBuilder.CreateHelix(name, shapeID, vec3(x, y, z), radius, step));
+									if (stream >> radius >> step) {
+										shapes.emplace_back(geoBuilder.CreateHelix(std::move(shapeLabel), shapeID, vec3(x, y, z), radius, step));
 									} else {
 										LogError("Unable to parse helix: %s", line.c_str());
 									}
